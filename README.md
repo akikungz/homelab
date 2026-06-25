@@ -80,6 +80,22 @@ A boilerplate/blueprint for deploying new applications with separate environment
 
 ---
 
+## 🚀 Creating a New Project from Template
+
+You can quickly scaffold a new Kustomize application by copying the `template` folder using the included automation scripts. The scripts automatically copy the folder, rename resources (such as `template-app` to your new project name), and initialize the `.env` configuration files for each environment.
+
+### Using PowerShell (Windows)
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/akikungz/homelab/main/new-project.ps1))) -Name "my-new-app"
+```
+
+### Using Bash (Linux/macOS)
+```bash
+curl -sSL https://raw.githubusercontent.com/akikungz/homelab/main/new-project.sh | bash -s -- -n "my-new-app"
+```
+
+---
+
 ## 🔒 Security & Git Best Practices
 
 Sensitive credentials, hostnames, and local settings are externalized using `.env` files. Ensure you never commit active `.env` or `.env.secret` files to Git. The root [`.gitignore`](./.gitignore) is configured to keep these files private.
