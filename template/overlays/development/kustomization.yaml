@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: development
+
+configMapGenerator:
+  - name: template-app-config
+    envs:
+      - .env.config
+
+# Adjust resources and replicas for development env
+patches:
+  - target:
+      kind: Deployment
+      name: template-app
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: template-app
+      spec:
+        replicas: 1
+        template:
+          spec:
+            containers:
+              - name: app
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
+                  limits:
+                    cpu: 100m
+                    memory: 128Mi

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: template-app
+  template:
+    metadata:
+      labels:
+        app: template-app
+    spec:
+      containers:
+        - name: app
+          image: nginx:alpine
+          ports:
+            - name: http
+              containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: template-app-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: template-app-pvc
