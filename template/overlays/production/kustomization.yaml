@@ -11,6 +11,11 @@ configMapGenerator:
     envs:
       - .env.config
 
+secretGenerator:
+  - name: template-app-secret
+    envs:
+      - .env.secret
+
 # Adjust resources and replicas for production env
 patches:
   - target:

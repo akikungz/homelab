@@ -21,6 +21,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: template-app-config
+            - secretRef:
+                name: template-app-secret
           resources:
             requests:
               cpu: 100m
