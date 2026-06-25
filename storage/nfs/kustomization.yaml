@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - nfs-sc.yaml
+
+configMapGenerator:
+  - name: storage-env
+    envs:
+      - .env
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: storage-env
+      fieldPath: data.SERVER
+    targets:
+      - select:
+          kind: StorageClass
+          name: nfs-csi
+        fieldPaths:
+          - parameters.server
+  - source:
+      kind: ConfigMap
+      name: storage-env
+      fieldPath: data.SHARE_PATH
+    targets:
+      - select:
+          kind: StorageClass
+          name: nfs-csi
+        fieldPaths:
+          - parameters.share
+
+helmCharts:
+- name: csi-driver-nfs
+  repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+  version: v4.13.3
+  releaseName: csi-driver-nfs
+  namespace: kube-system

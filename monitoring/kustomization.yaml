@@ -1,0 +1,73 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - 00-namespace.yaml
+  - 01-grafana-config.yaml
+  - 01-loki-config.yaml
+  - 01-tempo-config.yaml
+  - 01-mimir-config.yaml
+  - 01-otel-collector-config.yaml
+  - 02-loki.yaml
+  - 02-tempo.yaml
+  - 02-mimir.yaml
+  - 03-grafana.yaml
+  - 03-otel-collector-gateway.yaml
+  - 04-otel-collector-daemonset.yaml
+  - 05-ingress.yaml
+secretGenerator:
+  - name: monitoring-env
+    envs:
+      - .env.secrets
+configMapGenerator:
+  - name: monitoring-env
+    envs:
+      - .env.config
+generatorOptions:
+  disableNameSuffixHash: true
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: monitoring-env
+      fieldPath: data.STORAGE_CLASS
+    targets:
+      - select:
+          kind: PersistentVolumeClaim
+        fieldPaths:
+          - spec.storageClassName
+  - source:
+      kind: ConfigMap
+      name: monitoring-env
+      fieldPath: data.INGRESS_CLASS
+    targets:
+      - select:
+          kind: Ingress
+          name: grafana
+        fieldPaths:
+          - spec.ingressClassName
+      - select:
+          kind: Ingress
+          name: otel-collector-http
+        fieldPaths:
+          - spec.ingressClassName
+  - source:
+      kind: ConfigMap
+      name: monitoring-env
+      fieldPath: data.GRAFANA_INGRESS_HOST
+    targets:
+      - select:
+          kind: Ingress
+          name: grafana
+        fieldPaths:
+          - spec.rules.0.host
+  - source:
+      kind: ConfigMap
+      name: monitoring-env
+      fieldPath: data.OTEL_COLLECTOR_INGRESS_HOST
+    targets:
+      - select:
+          kind: Ingress
+          name: otel-collector-http
+        fieldPaths:
+          - spec.rules.0.host

@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-gateway-config
+  namespace: monitoring
+  labels:
+    app: otel-collector-gateway
+data:
+  otel-collector-config.yaml: |
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+      bearertokenauth/otlp_http:
+        scheme: Bearer
+        token: ${env:OTEL_HTTP_BEARER_TOKEN}
+
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+            auth:
+              authenticator: bearertokenauth/otlp_http
+
+    processors:
+      memory_limiter:
+        check_interval: 2s
+        limit_mib: 512
+        spike_limit_mib: 128
+      transform/logs_service_name:
+        error_mode: ignore
+        log_statements:
+          - context: resource
+            statements:
+              - set(attributes["service.name"], attributes["k8s.container.name"]) where attributes["service.name"] == nil and attributes["k8s.container.name"] != nil
+              - set(attributes["service.name"], attributes["k8s.pod.name"]) where attributes["service.name"] == nil and attributes["k8s.pod.name"] != nil
+      batch:
+        send_batch_size: 1024
+        timeout: 5s
+      resource:
+        attributes:
+          - key: deployment.environment
+            value: k8s
+            action: upsert
+
+    exporters:
+      otlp/tempo:
+        endpoint: tempo.monitoring.svc.cluster.local:4317
+        tls:
+          insecure: true
+      prometheusremotewrite/mimir:
+        endpoint: http://mimir.monitoring.svc.cluster.local:9009/api/v1/push
+      loki:
+        endpoint: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+      debug:
+        verbosity: basic
+
+    service:
+      extensions: [health_check, bearertokenauth/otlp_http]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [otlp/tempo, debug]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheusremotewrite/mimir, debug]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, transform/logs_service_name, batch]
+          exporters: [loki, debug]

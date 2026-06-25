@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mimir-config
+  namespace: monitoring
+  labels:
+    app: mimir
+data:
+  mimir.yaml: |
+    multitenancy_enabled: false
+
+    server:
+      http_listen_port: 9009
+
+    common:
+      storage:
+        backend: filesystem
+        filesystem:
+          dir: /data/common
+
+    blocks_storage:
+      backend: filesystem
+      filesystem:
+        dir: /data/blocks
+
+    compactor:
+      data_dir: /data/compactor
+
+    distributor:
+      ring:
+        kvstore:
+          store: inmemory
+
+    ingester:
+      ring:
+        kvstore:
+          store: inmemory
+        replication_factor: 1
+
+    ruler_storage:
+      backend: filesystem
+      filesystem:
+        dir: /data/rules
