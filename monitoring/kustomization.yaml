@@ -18,7 +18,7 @@ resources:
 secretGenerator:
   - name: monitoring-env
     envs:
-      - .env.secrets
+      - .env.secret
 configMapGenerator:
   - name: monitoring-env
     envs:

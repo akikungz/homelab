@@ -24,15 +24,15 @@ This folder deploys a Kubernetes monitoring stack in the monitoring namespace:
 - 05-ingress.yaml: Ingress resources for Grafana and OTel HTTP
 - kustomization.yaml: Main deployment entrypoint
 - .env.config.example: Non-secret config template (ingress hosts)
-- .env.secrets.example: Secret template (credentials and tokens)
+- .env.secret.example: Secret template (credentials and tokens)
 
 ## Secret and Environment Setup
 
-This setup is safe for GitHub when real secrets are kept in .env.secrets only.
+This setup is safe for GitHub when real secrets are kept in .env.secret only.
 
 1. Copy the template:
    cp monitoring/.env.config.example monitoring/.env.config
-   cp monitoring/.env.secrets.example monitoring/.env.secrets
+   cp monitoring/.env.secret.example monitoring/.env.secret
 
 2. Edit monitoring/.env.config (non-secret values):
    - STORAGE_CLASS (example: nfs-csi)
@@ -40,15 +40,15 @@ This setup is safe for GitHub when real secrets are kept in .env.secrets only.
    - GRAFANA_INGRESS_HOST
    - OTEL_COLLECTOR_INGRESS_HOST
 
-3. Edit monitoring/.env.secrets with real values:
+3. Edit monitoring/.env.secret with real values:
    - GRAFANA_ADMIN_USER
    - GRAFANA_ADMIN_PASSWORD
    - OTEL_HTTP_BEARER_TOKEN
 
-4. Ensure monitoring/.env.secrets is ignored by Git (recommended in repository .gitignore).
+4. Ensure monitoring/.env.secret is ignored by Git (recommended in repository .gitignore).
 
 kustomization.yaml uses:
-- secretGenerator to create Secret monitoring-env from .env.secrets
+- secretGenerator to create Secret monitoring-env from .env.secret
 - configMapGenerator to create ConfigMap monitoring-env from .env.config
 
 ## Deploy
