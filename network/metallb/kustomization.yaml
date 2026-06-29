@@ -26,3 +26,20 @@ replacements:
           name: default-pool
         fieldPaths:
           - spec.addresses.0
+
+patches:
+  - target:
+      kind: ClusterRole
+      name: frr-k8s-daemon-role
+    patch: |
+      - op: add
+        path: /rules/-
+        value:
+          apiGroups:
+            - frrk8s.metallb.io
+          resources:
+            - frrk8sconfigurations
+          verbs:
+            - get
+            - list
+            - watch
