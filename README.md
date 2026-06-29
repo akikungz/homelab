@@ -76,7 +76,7 @@ Deploys the MetalLB load balancer to provide external IP addresses to Services o
     ```
 *   **Deploy**:
     ```bash
-    kubectl apply -k network/metallb --server-side --enable-helm
+    kubectl apply -k network/metallb
     ```
 *   Refer to the [MetalLB README](./network/metallb/README.md) for more details on configuration, BGP, and validation.
 
