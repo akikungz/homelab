@@ -131,6 +131,9 @@ spec:
       serviceAccountName: otel-collector-agent
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
       containers:
         - name: otel-collector-agent
           image: otel/opentelemetry-collector-contrib:0.106.1

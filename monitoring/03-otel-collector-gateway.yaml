@@ -6,7 +6,7 @@ metadata:
   labels:
     app: otel-collector-gateway
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: otel-collector-gateway
   ports:
@@ -16,9 +16,6 @@ spec:
     - name: otlp-http
       port: 4318
       targetPort: 4318
-    - name: health
-      port: 13133
-      targetPort: 13133
 
 ---
 apiVersion: v1
