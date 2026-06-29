@@ -1,18 +1,4 @@
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mimir-pvc
-  namespace: monitoring
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: nfs-csi
-  resources:
-    requests:
-      storage: 50Gi
-
----
-apiVersion: v1
 kind: Service
 metadata:
   name: mimir
@@ -27,16 +13,34 @@ spec:
     - name: http
       port: 9009
       targetPort: 9009
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-lens-proxy
+  namespace: monitoring
+  labels:
+    app: prometheus
+    component: server
+    heritage: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: mimir
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9009
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mimir
   namespace: monitoring
   labels:
     app: mimir
 spec:
+  serviceName: mimir
   replicas: 1
   selector:
     matchLabels:
@@ -85,6 +89,13 @@ spec:
         - name: mimir-config
           configMap:
             name: mimir-config
-        - name: mimir-storage
-          persistentVolumeClaim:
-            claimName: mimir-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: mimir-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: nfs-csi
+        resources:
+          requests:
+            storage: 50Gi

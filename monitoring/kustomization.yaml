@@ -13,6 +13,8 @@ resources:
   - 02-mimir.yaml
   - 03-grafana.yaml
   - 03-otel-collector-gateway.yaml
+  - 04-kube-state-metrics.yaml
+  - 04-node-exporter.yaml
   - 04-otel-collector-daemonset.yaml
   - 05-ingress.yaml
 secretGenerator:
@@ -36,6 +38,10 @@ replacements:
           kind: PersistentVolumeClaim
         fieldPaths:
           - spec.storageClassName
+      - select:
+          kind: StatefulSet
+        fieldPaths:
+          - spec.volumeClaimTemplates.0.spec.storageClassName
   - source:
       kind: ConfigMap
       name: monitoring-env

@@ -21,6 +21,45 @@ spec:
       targetPort: 13133
 
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector-gateway
+  namespace: monitoring
+  labels:
+    app: otel-collector-gateway
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector-gateway
+  labels:
+    app: otel-collector-gateway
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector-gateway
+  labels:
+    app: otel-collector-gateway
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector-gateway
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector-gateway
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,6 +77,7 @@ spec:
       labels:
         app: otel-collector-gateway
     spec:
+      serviceAccountName: otel-collector-gateway
       initContainers:
         - name: wait-for-lgtm-backends
           image: curlimages/curl:8.8.0
