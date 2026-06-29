@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: metallb-system
+
+resources:
+  - github.com/metallb/metallb/config/frr-k8s?ref=v0.14.9
+  - 01-ipaddresspool.yaml
+  - 02-l2advertisement.yaml
+
+configMapGenerator:
+  - name: metallb-env
+    envs:
+      - .env
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: metallb-env
+      fieldPath: data.IP_RANGE
+    targets:
+      - select:
+          kind: IPAddressPool
+          name: default-pool
+        fieldPaths:
+          - spec.addresses.0

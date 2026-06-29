@@ -6,9 +6,10 @@ This repository contains Kubernetes manifests, configurations, and templates use
 
 ## 📁 Repository Structure
 
+*   **[`network/metallb/`](./network/metallb)**: Deploys and configures the MetalLB load balancer in Layer 2 mode with dynamic IP range configurations.
 *   **[`storage/nfs/`](./storage/nfs)**: Configures and deploys the NFS CSI StorageClass (`nfs-csi`) using environment variable replacements.
 *   **[`monitoring/`](./monitoring)**: Deploys the LGTM monitoring stack along with OpenTelemetry (Grafana, Loki, Tempo, Mimir, OTel Collector Gateway, and OTel DaemonSet agent).
-*   **[`template/`](./template)**: A reusable application template structure using `base` and overlay-specific environments (`development`, `staging`, `production`) for consistent, multi-environment app deployments.
+*   **[`template/`](./template)**: A reusable application template structure using `base` and overlay-specific environments (`development`, `staging`, and `production`) for consistent, multi-environment app deployments.
 
 ---
 
@@ -63,7 +64,23 @@ Deploys a complete observability stack under the `monitoring` namespace.
     ```
 *   Refer to the [Monitoring README](./monitoring/README.md) for detailed configuration, ingress setup, and validation steps.
 
-### 3. Application Template
+### 3. Network (MetalLB)
+
+Deploys the MetalLB load balancer to provide external IP addresses to Services of type `LoadBalancer` inside your local subnet.
+
+*   **Path**: [`network/metallb/`](./network/metallb)
+*   **Setup**:
+    ```bash
+    cp network/metallb/.env.example network/metallb/.env
+    # Edit network/metallb/.env with your local IP range pool
+    ```
+*   **Deploy**:
+    ```bash
+    kubectl apply -k network/metallb --server-side --enable-helm
+    ```
+*   Refer to the [MetalLB README](./network/metallb/README.md) for more details on configuration, BGP, and validation.
+
+### 4. Application Template
 
 A boilerplate/blueprint for deploying new applications with separate environment configurations.
 
